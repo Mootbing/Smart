@@ -39,12 +39,12 @@ def recognize_continuous_from_microphone():
         if isQuestion:
             # print('\n\n\nFinished Questionable: {}'.format(evt.result.text))
             # print("Ctx: {}".format(context))
-            print("\n\n\n--Incoming--")
+            print("\n\n\nThinking...")
 
             response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant answering a question like a student in class. Phrase it in a one-sentence answer from the perspective of a student answering the question just asked. Sound like a student and not a teacher. Make a one-sentence response that sounds semi-formal but appropriate to the classroom. Try to make it as short as possible. even better if you can answer in a few words. Cut the introduction like 'I would think..., Yeah, I agree..., etc'"},
+                {"role": "system", "content": "You are a helpful assistant answering a question like a student in class. Phrase it in a one-sentence answer from the perspective of a student answering the question just asked. Sounds semi-formal and appropriate. Try to make it as short as possible that covers key points. Cut the introduction like 'I would think..., Yeah, I agree..., etc' and a lot of filler words."},
                 {"role": "user", "content": "Here's the context to the conversation " + ",".join(context)},
                 {"role": "user", "content": sentence}
             ]
@@ -52,10 +52,10 @@ def recognize_continuous_from_microphone():
 
             if response.choices:
                 message_content = response.choices[0].message.content
-                print("\n\n\nResponse:", message_content)
+                print("\n\n", message_content)
                 context = [message_content]
             else:
-                print("There was no response.")
+                print("Error: No response. Try again.")
 
             isQuestion = False
 
