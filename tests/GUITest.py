@@ -27,8 +27,16 @@ class VoiceRecognitionApp:
         self.master = master
         self.master.title("自动举手器")
         self.master.wm_attributes("-topmost", 1)
-        self.master.resizable(False, True)
+        self.master.resizable(False, False)
         self.master.geometry("400x150")
+        self.master.attributes('-alpha', 0.2)
+        # self.master.configure(bg='black')
+        # make topbar black
+        # self.master.overrideredirect(True)
+        # self.master.configure(bg='black')
+        # self.master.attributes('-transparentcolor', 'black')
+
+        
 
         self.isQuestion = False
         self.context = []
@@ -40,18 +48,18 @@ class VoiceRecognitionApp:
         self.text_area.place(x=0, y=0, width=400, height=125)
         # make font size small
         self.text_area.configure(font=("Times New Roman", 10))
+        # set transparent
+        self.text_area.configure(bg='black', fg='white')
 
         # Start button
         self.toggle_button = tk.Button(master, text="开始", command=self.toggle_listening)
         self.toggle_button.place(x=0, y=125, width=300, height=25)
-
-        # # Stop button
-        # self.stop_button = tk.Button(master, text="停止", command=self.stop_listening)
-        # self.stop_button.place(x=200, y=150, width=200, height=25)
+        self.toggle_button.configure(bg='black', fg='white')
 
         #clear button
         self.clear_button = tk.Button(master, text="清除", command=self.clear_text)
         self.clear_button.place(x=300, y=125, width=100, height=25)
+        self.clear_button.configure(bg='black', fg='red')
         # self.stop_button['state'] = 'disabled'
 
     def toggle_listening(self):
