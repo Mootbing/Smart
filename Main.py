@@ -27,8 +27,7 @@ def recognize_continuous_from_microphone():
 
     isQuestion = False
     context = []
-
-    # Connect callbacks to the events fired by the speech recognizer
+    
     def recognizedPhrase (evt): 
         nonlocal isQuestion, context
 
@@ -37,8 +36,6 @@ def recognize_continuous_from_microphone():
             isQuestion = "?" in sentence
         
         if isQuestion:
-            # print('\n\n\nFinished Questionable: {}'.format(evt.result.text))
-            # print("Ctx: {}".format(context))
             print("\n\n\nThinking...")
 
             response = client.chat.completions.create(
@@ -61,28 +58,9 @@ def recognize_continuous_from_microphone():
 
         else:
             context.append(sentence)
-            # print('Context: {}'.format(evt.result.text))
 
-    # def recongizingPhrase (evt): 
-    #     nonlocal isQuestion
-
-    #     print('Recognizing: {}'.format(evt.result.text))
-    #     sentence = evt.result.text
-    #     for word in sentence:
-    #         word = word.lower()
-    #         if word in questionWords:
-    #             isQuestion = True
-    #             print("question found")
-    #             break
-
-
-    # speech_recognizer.recognizing.connect(recongizingPhrase)
     speech_recognizer.recognized.connect(recognizedPhrase)
-    # speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
-    # speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
-    # speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
 
-    # Start continuous speech recognition
     speech_recognizer.start_continuous_recognition()
     while not done:
         command = input("Type 'stop' to exit: ")
