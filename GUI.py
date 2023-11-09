@@ -25,16 +25,16 @@ speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audi
 class VoiceRecognitionApp:
     def __init__(self, master):
         self.master = master
-        self.master.title("自动举手器")
+        self.master.title("区块链助手")
         self.master.wm_attributes("-topmost", 1)
         self.master.resizable(False, False)
-        self.master.geometry("400x150")
         self.master.attributes('-alpha', 0.2)
-        # self.master.configure(bg='black')
-        # make topbar black
-        # self.master.overrideredirect(True)
-        # self.master.configure(bg='black')
-        # self.master.attributes('-transparentcolor', 'black')
+
+        # place window in bottom right corner
+        # self.master.update_idletasks()
+        x = self.master.winfo_screenwidth() - 200 - 25
+        y = self.master.winfo_screenheight() - 225 - 25
+        self.master.geometry("200x150+{}+{}".format(x, y))
 
         
 
@@ -45,20 +45,20 @@ class VoiceRecognitionApp:
         # Text box to show conversation
         self.text_area = scrolledtext.ScrolledText(master, wrap=tk.WORD)
         # place in 200x50
-        self.text_area.place(x=0, y=0, width=400, height=125)
+        self.text_area.place(x=0, y=0, width=200, height=125)
         # make font size small
-        self.text_area.configure(font=("Times New Roman", 10))
+        self.text_area.configure(font=("Times New Roman", 8))
         # set transparent
         self.text_area.configure(bg='black', fg='white')
 
         # Start button
-        self.toggle_button = tk.Button(master, text="开始", command=self.toggle_listening)
-        self.toggle_button.place(x=0, y=125, width=300, height=25)
+        self.toggle_button = tk.Button(master, text="开始", command=self.toggle_listening, relief='flat', borderwidth=0)
+        self.toggle_button.place(x=0, y=125, width=150, height=25)
         self.toggle_button.configure(bg='black', fg='white')
 
         #clear button
-        self.clear_button = tk.Button(master, text="清除", command=self.clear_text)
-        self.clear_button.place(x=300, y=125, width=100, height=25)
+        self.clear_button = tk.Button(master, text="清除", command=self.clear_text, relief='flat', borderwidth=0)
+        self.clear_button.place(x=150, y=125, width=50, height=25)
         self.clear_button.configure(bg='black', fg='red')
         # self.stop_button['state'] = 'disabled'
 
@@ -72,19 +72,23 @@ class VoiceRecognitionApp:
 
     def start_listening(self):
         threading.Thread(target=self.recognize_continuous_from_microphone).start()
-        self.update_text(f"\n{datetime.datetime.now()}: 开始识别\n")
+        self.update_text(f"\n开始")
         # self.start_button['state'] = 'disabled'
         # self.stop_button['state'] = 'normal'
 
     def stop_listening(self):
         self.done = True
         speech_recognizer.stop_continuous_recognition()
-        self.update_text(f"\n{datetime.datetime.now()}: 停止识别")
+        self.update_text(f"\n停止")
         # self.stop_button['state'] = 'disabled'
         # self.start_button['state'] = 'normal'
 
     def update_text(self, message):
         self.text_area.insert(tk.END, message + '\n')
+        self.text_area.see(tk.END)
+
+    def update_text_no_newline(self, message):
+        self.text_area.insert(tk.END, message)
         self.text_area.see(tk.END)
 
     def clear_text(self):
@@ -99,14 +103,13 @@ class VoiceRecognitionApp:
 
     def recognizedPhrase(self, evt):
         sentence = evt.result.text
-        self.update_text(f"获得")
+        self.update_text_no_newline(f".")
 
         if not self.isQuestion:
             self.isQuestion = "?" in sentence
         
         if self.isQuestion:
-            self.update_text("\n\n\n")
-            self.update_text(f"{datetime.datetime.now()}: \n" + sentence + "\n" + "思维中")
+            self.update_text(f"\n\n{datetime.datetime.now()}: \n" + sentence + "\n" + "思维中")
 
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
