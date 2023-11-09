@@ -43,7 +43,7 @@ class VoiceRecognitionApp:
         self.done = False
 
         # Text box to show conversation
-        self.text_area = scrolledtext.ScrolledText(master, wrap=tk.WORD)
+        self.text_area = scrolledtext.ScrolledText(master, wrap=tk.WORD, relief='flat', borderwidth=0)
         # place in 200x50
         self.text_area.place(x=0, y=0, width=200, height=125)
         # make font size small
@@ -115,7 +115,7 @@ class VoiceRecognitionApp:
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant answering questions. Try to make your answers concise."},
-                    {"role": "user", "content": "Here's the context to the conversation: " + ", ".join(self.context)},
+                    {"role": "user", "content": "Here's the context to the conversation: " + ", ".join(self.context[:10])},
                     {"role": "user", "content": sentence}
                 ]
             )
@@ -126,14 +126,14 @@ class VoiceRecognitionApp:
             if response.choices:
                 message_content = response.choices[0].message.content
                 self.update_text( message_content)
-                self.context = [message_content]
+                # self.context = [message_content]
             else:
                 self.update_text("Error: No response. Try again.")
 
             self.isQuestion = False
             # self.update_text("\n\n问题停止\n\n")
-        else:
-            self.context.append(sentence)
+        
+        self.context.append(sentence)
 
 
 if __name__ == "__main__":
