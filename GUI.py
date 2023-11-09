@@ -105,7 +105,7 @@ class VoiceRecognitionApp:
             self.isQuestion = "?" in sentence
         
         if self.isQuestion:
-            self.clear_text()
+            self.update_text("\n\n\n")
             self.update_text(f"{datetime.datetime.now()}: \n" + sentence + "\n" + "思维中")
 
             response = client.chat.completions.create(
