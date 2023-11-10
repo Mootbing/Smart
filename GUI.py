@@ -28,7 +28,7 @@ class VoiceRecognitionApp:
         self.master.title("区块链助手")
         self.master.wm_attributes("-topmost", 1)
         self.master.resizable(False, False)
-        self.master.attributes('-alpha', 0.2)
+        self.master.attributes('-alpha', 0.5)
 
         # place window in bottom right corner
         # self.master.update_idletasks()
