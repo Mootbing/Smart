@@ -1,16 +1,20 @@
 import os
 import azure.cognitiveservices.speech as speechsdk
-
 from openai import OpenAI
-client = OpenAI(api_key="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")
+
+# Move API keys to environment variables for security
+client = OpenAI(
+    api_key="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"
+)  # Will use OPENAI_API_KEY environment variable
 
 questionWords = ["where", "who", "what", "how", "when", "do"]
 
 def recognize_continuous_from_microphone():
-    # This example requires environment variables named "SPEECH_KEY" and "SPEECH_REGION"
-    speech_key = '04243e7483fd4106b20b6e0818ddc369'
-    service_region = 'eastus'
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Configure speech service using environment variables
+    speech_config = speechsdk.SpeechConfig(
+        subscription=os.getenv('AZURE_SPEECH_KEY', '04243e7483fd4106b20b6e0818ddc369'),
+        region=os.getenv('AZURE_SPEECH_REGION', 'eastus')
+    )
     speech_config.speech_recognition_language = "en-US"
 
     audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
@@ -28,7 +32,7 @@ def recognize_continuous_from_microphone():
     isQuestion = False
     context = []
     
-    def recognizedPhrase (evt): 
+    def recognizedPhrase(evt): 
         nonlocal isQuestion, context
 
         sentence = evt.result.text
@@ -38,42 +42,49 @@ def recognize_continuous_from_microphone():
         if isQuestion:
             print("\n\n\nThinking...")
 
-            response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant answering a question like a student in class. Phrase it in a one-sentence answer from the perspective of a student answering the question just asked. Sounds semi-formal and appropriate. Try to make it as short as possible that covers key points. Cut the introduction like 'I would think..., Yeah, I agree..., etc' and a lot of filler words."},
-                {"role": "user", "content": "Here's the context to the conversation " + ",".join(context)},
-                {"role": "user", "content": sentence}
-            ]
-            )
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant answering a question like a student in class. Phrase it in a one-sentence answer from the perspective of a student answering the question just asked. Sounds semi-formal and appropriate. Try to make it as short as possible that covers key points. Cut the introduction like 'I would think..., Yeah, I agree..., etc' and a lot of filler words."},
+                        {"role": "user", "content": f"Here's the context to the conversation: {', '.join(context)}"},
+                        {"role": "user", "content": sentence}
+                    ]
+                )
 
-            if response.choices:
-                message_content = response.choices[0].message.content
-                print("\n\n", message_content)
-                context = [message_content]
-            else:
-                print("Error: No response. Try again.")
+                if response.choices:
+                    message_content = response.choices[0].message.content
+                    print("\n\n", message_content)
+                    context = [message_content]
+                else:
+                    print("Error: No response. Try again.")
+
+            except Exception as e:
+                print(f"Error occurred: {str(e)}")
 
             isQuestion = False
-
         else:
             context.append(sentence)
 
+    # Set up event handlers
     speech_recognizer.recognized.connect(recognizedPhrase)
-
-    speech_recognizer.start_continuous_recognition()
-    while not done:
-        command = input("Type 'stop' to exit: ")
-        if command == 'stop':
-            speech_recognizer.stop_continuous_recognition()
-            done = True
-
     speech_recognizer.session_stopped.connect(stop_cb)
     speech_recognizer.canceled.connect(stop_cb)
 
-    # Wait for completion
-    speech_recognizer.session_started.disconnect()
-    speech_recognizer.session_stopped.disconnect()
-    speech_recognizer.canceled.disconnect()
+    # Start recognition
+    speech_recognizer.start_continuous_recognition()
+    
+    try:
+        while not done:
+            command = input("Type 'stop' to exit: ")
+            if command.lower() == 'stop':
+                speech_recognizer.stop_continuous_recognition()
+                done = True
+    finally:
+        # Cleanup
+        speech_recognizer.recognized.disconnect_all()
+        speech_recognizer.session_stopped.disconnect_all()
+        speech_recognizer.canceled.disconnect_all()
 
-recognize_continuous_from_microphone()
+if __name__ == "__main__":
+    recognize_continuous_from_microphone()
