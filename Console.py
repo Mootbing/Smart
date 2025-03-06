@@ -46,7 +46,7 @@ def recognize_continuous_from_microphone():
                 response = client.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[
-                        {"role": "system", "content": "You are a helpful assistant answering a question like a student in class. Phrase it in a one-sentence answer from the perspective of a student answering the question just asked. Sounds semi-formal and appropriate. Try to make it as short as possible that covers key points. Cut the introduction like 'I would think..., Yeah, I agree..., etc' and a lot of filler words."},
+                        {"role": "system", "content": "You are a helpful assistant answering a question like a student in class. Phrase it very concisely which represents the thought process of a student answering the question just asked. Sound appropriate. Make it as short as possible that covers key points. Use -> to connect thoughts which should be one or two words"},
                         {"role": "user", "content": f"Here's the context to the conversation: {', '.join(context)}"},
                         {"role": "user", "content": sentence}
                     ]
@@ -54,7 +54,7 @@ def recognize_continuous_from_microphone():
 
                 if response.choices:
                     message_content = response.choices[0].message.content
-                    print("\n\n", message_content)
+                    print("\n\n", "\n".join(message_content.split("->")))
                     context = [message_content]
                 else:
                     print("Error: No response. Try again.")
